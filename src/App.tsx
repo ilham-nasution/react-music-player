@@ -8,6 +8,19 @@ import GenreBtn from "./components/GenreBtn";
 function App() {
   const [chartList, setChartList] = useState<TrackInterface[]>([]);
   const [genreList, setGenreList] = useState<GenreInterface[]>([]);
+  const [genreTrackList, setGenreTrackList] = useState<TrackInterface[]>([]);
+  const [selectedGenre, setSelectedGenre] = useState<GenreInterface>({
+    count: 0,
+    countryid: "",
+    id: "",
+    listid: "genre-global-chart-1",
+    name: "Pop",
+    urlPath: "",
+  });
+
+  const handleGenreBtn = (genre: GenreInterface) => {
+    setSelectedGenre(genre);
+  };
 
   const fetchChartList = async () => {
     try {
@@ -53,10 +66,36 @@ function App() {
     }
   };
 
+  const fetchGenreTracks = async (listId: string) => {
+    try {
+      const response = await fetch(
+        `https://shazam.p.rapidapi.com/charts/track?listId=${listId}`,
+        {
+          method: "GET",
+          headers: {
+            "X-RapidAPI-Key": import.meta.env.VITE_API_KEY,
+            "X-RapidAPI-Host": "shazam.p.rapidapi.com",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        setGenreTrackList(result.tracks);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchChartList();
     fetchGenreList();
   }, []);
+
+  useEffect(() => {
+    fetchGenreTracks(selectedGenre.listid);
+  }, [selectedGenre]);
 
   return (
     <div className="container mx-auto px-3">
@@ -68,7 +107,17 @@ function App() {
       </div>
       <div className="flex overflow-x-scroll gap-3 my-3">
         {genreList.map((genre) => (
-          <GenreBtn key={genre.id} genre={genre} />
+          <GenreBtn
+            key={genre.id}
+            genre={genre}
+            selectedGenre={selectedGenre}
+            handleGenreBtn={handleGenreBtn}
+          />
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {genreTrackList.map((track) => (
+          <SongCard key={track.key} track={track} />
         ))}
       </div>
     </div>
