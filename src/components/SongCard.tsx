@@ -2,7 +2,7 @@ import TrackInterface from "../types/TrackInterface";
 
 export default function SongCard({ track }: { track: TrackInterface }) {
   return (
-    <div key={track.key}>
+    <div>
       <img
         src={track.images.coverart}
         alt={track.title}
