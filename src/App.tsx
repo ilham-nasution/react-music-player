@@ -4,6 +4,7 @@ import TrackInterface from "./types/TrackInterface";
 import GenreInterface from "./types/GenreInterface";
 import SongCard from "./components/SongCard";
 import GenreBtn from "./components/GenreBtn";
+import SongCardSkeleton from "./components/SongCardSkeleton";
 
 function App() {
   const [chartList, setChartList] = useState<TrackInterface[]>([]);
@@ -17,6 +18,7 @@ function App() {
     name: "Pop",
     urlPath: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGenreBtn = (genre: GenreInterface) => {
     setSelectedGenre(genre);
@@ -67,6 +69,7 @@ function App() {
   };
 
   const fetchGenreTracks = async (listId: string) => {
+    setIsLoading(true);
     try {
       const response = await fetch(
         `https://shazam.p.rapidapi.com/charts/track?listId=${listId}`,
@@ -85,6 +88,8 @@ function App() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -115,10 +120,12 @@ function App() {
           />
         ))}
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        {genreTrackList.map((track) => (
-          <SongCard key={track.key} track={track} />
-        ))}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+        {isLoading
+          ? [...Array(20).keys()].map(() => <SongCardSkeleton />)
+          : genreTrackList.map((track) => (
+              <SongCard key={track.key} track={track} />
+            ))}
       </div>
     </div>
   );
